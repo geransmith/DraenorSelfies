@@ -40,17 +40,17 @@ class StdOutListener(tweepy.StreamListener):
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print '@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore'))
         # looks at the json and see if we have pic.twitter.com there somewhere
-        if 'pic.twitter.com' in data and "selfie" in decoded['text']:
+        if 'pic.twitter.com' in data and 'selfie' in decoded['text']:
             print 'pic.twitter.com was found in the data stream'
             is_data_good = 1
         
         # looks at the decoded text to see if they are talking about achievements
-        if "Achievement" in decoded['text']:
+        if 'Achievement' in decoded['text']:
             print 'Achievement found in the tweet'
             is_data_good = 0
             
         # We don't retweet retweets
-        if "retweeted_status" in data:
+        if 'retweeted_status' in data:
             print 'retweeted_status was found in the data stream'
             is_data_good = 0
 			
