@@ -11,6 +11,9 @@ consumer_secret = '123456' #keep the quotes, replace this with your consumer sec
 access_token = '123456' #keep the quotes, replace this with your access token
 access_token_secret = '123456' #keep the quotes, replace this with your access token secret
 
+user_filters = []
+last_filter_update = 0
+
 # retweet function
 def doRetweet(id_string):
     print 'WE MADE IT INTO doRetweet'
@@ -26,6 +29,10 @@ def doRetweet(id_string):
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
     def on_data(self, data):
+		# Filter upkeep
+		if last_filter_update == 0 or time.time() - last_filter_update > 3600:
+			user_filters.clear()
+	
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
         is_data_good = 0
@@ -47,11 +54,18 @@ class StdOutListener(tweepy.StreamListener):
         if 'retweeted_status' in data:
             print 'retweeted_status was found in the data stream'
             is_data_good = 0
+			
+		userID = decoded['user']['id']
+		
+		# Make sure this user hasn't been filtered yet.
+		if userID in user_filters:
+			is_data_good = 0
         
         # Check to see if the data was decided to be good
         if is_data_good == 1:
             print 'Data was deemed good'
             tweet_id = decoded['id_str']
+			user_filters.append(userID)
             doRetweet(tweet_id)
         else:
             print 'Data was determined to be bad'
