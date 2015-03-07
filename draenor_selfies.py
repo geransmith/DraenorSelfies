@@ -76,6 +76,6 @@ try:
         # In this example follow #warcraft tag
         # For more details refer to https://dev.twitter.com/docs/streaming-apis
         stream = tweepy.Stream(auth, l)
-        stream.filter(track=['#warcraft','selfie'], languages=['en'])
+        stream.filter(track=['#warcraft'], languages=['en'])
 except KeyboardInterrupt:
     sys.exit()
