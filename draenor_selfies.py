@@ -34,7 +34,7 @@ class StdOutListener(tweepy.StreamListener):
         print '@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore'))
         # looks at the json and see if we have pic.twitter.com there somewhere
         # also looks the json and see if we have 'selfie' in the stream
-        if 'pic.twitter.com' in data AND 'selfie' in decoded['text']:
+        if 'pic.twitter.com' in data and 'selfie' in decoded['text']:
             print 'pic.twitter.com was found in the data stream'
             is_data_good = 1
         
