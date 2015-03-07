@@ -1,3 +1,5 @@
 # DraenorSelfies
 Used to retweet selfies taken in World of Warcraft
-Nothing to read here
+
+DEPENDENCIES:
+http://tweepy.readthedocs.org/en/v3.3.0/
