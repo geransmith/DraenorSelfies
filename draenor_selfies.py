@@ -40,7 +40,7 @@ class StdOutListener(tweepy.StreamListener):
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print '@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore'))
         # looks at the json and see if we have pic.twitter.com there somewhere
-        if 'pic.twitter.com' in data:
+        if 'pic.twitter.com' in data and "selfie" in decoded['text']:
             print 'pic.twitter.com was found in the data stream'
             is_data_good = 1
         
