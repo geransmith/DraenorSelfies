@@ -38,17 +38,17 @@ class StdOutListener(tweepy.StreamListener):
             is_data_good = 1
         
         # ignores tweets that have "selfie" in their text
-        if "selfie" in decoded['text']:
+        if 'selfie' in decoded['text']:
             print 'selfie was found in the tweet, yay!'
             is_data_good = 1
         
         # looks at the decoded text to see if they are talking about achievements
-        if "Achievement" in decoded['text']:
+        if 'Achievement' in decoded['text']:
             print 'Achievement found in the tweet'
             is_data_good = 0
             
         # We don't retweet retweets
-        if "retweeted_status" in data:
+        if 'retweeted_status' in data:
             print 'retweeted_status was found in the data stream'
             is_data_good = 0
         
