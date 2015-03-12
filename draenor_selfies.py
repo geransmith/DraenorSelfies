@@ -28,7 +28,9 @@ class StdOutListener(tweepy.StreamListener):
             
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
-        is_data_good = 0
+        
+        # When this is 0, we will not retweet
+        is_data_good = 1
         
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print('@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore')))
@@ -70,8 +72,6 @@ try:
         l = StdOutListener()
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
-
-        print("Showing all new tweets for #warcraft:")
 
         # There are different kinds of streams: public stream, user stream, multi-user streams
         # In this example follow #warcraft tag
