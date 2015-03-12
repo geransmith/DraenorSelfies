@@ -5,3 +5,5 @@ DEPENDENCIES:
 http://tweepy.readthedocs.org/en/v3.3.0/
 
 Tested on python 3.4.
+
+I use http://tweeterid.com/, so convert the Twitter handles to IDs. Thanks for the helpful page!
