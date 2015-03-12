@@ -21,9 +21,9 @@ def doRetweet(id_string):
     print('WE MADE IT INTO doRetweet')
     print(id_string)
     # authenticate against the Twitter API
-    # api = tweepy.API(auth)
+    api = tweepy.API(auth)
     # actually do the retweet
-    # api.retweet(id_string)
+    api.retweet(id_string)
     print('I did the retweet')
     print()
     return
@@ -36,7 +36,7 @@ class StdOutListener(tweepy.StreamListener):
         decoded = json.loads(data)
         
         # When this is 0, we will not retweet
-        is_data_good = 1 
+        is_data_good = 0
         
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print('@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore')))
