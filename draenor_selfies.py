@@ -10,14 +10,20 @@ consumer_secret = '123456' #keep the quotes, replace this with your consumer sec
 access_token = '123456' #keep the quotes, replace this with your access token
 access_token_secret = '123456' #keep the quotes, replace this with your access token secret
 
+# We assume the text files exist and are in the same location as this script
+# Reads the "blocked_users" file and puts the data into the "blocked_users" variable, then closes the file (like a refrigerator)
+filename=open('blocked_users.txt','r')
+blocked_users=filename.readlines()
+filename.close
+
 # retweet function
 def doRetweet(id_string):
     print('WE MADE IT INTO doRetweet')
     print(id_string)
     # authenticate against the Twitter API
-    api = tweepy.API(auth)
+    # api = tweepy.API(auth)
     # actually do the retweet
-    api.retweet(id_string)
+    # api.retweet(id_string)
     print('I did the retweet')
     print()
     return
@@ -30,7 +36,7 @@ class StdOutListener(tweepy.StreamListener):
         decoded = json.loads(data)
         
         # When this is 0, we will not retweet
-        is_data_good = 1
+        is_data_good = 1 
         
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print('@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore')))
@@ -39,7 +45,7 @@ class StdOutListener(tweepy.StreamListener):
         if 'pic.twitter.com' in data and 'selfie' in decoded['text']:
             print('pic.twitter.com was found in the data stream')
             is_data_good = 1
-        
+                  
         # looks at the decoded text to see if they are talking about achievements
         if 'Achievement' in decoded['text']:
             print('Achievement found in the tweet')
@@ -49,6 +55,13 @@ class StdOutListener(tweepy.StreamListener):
         if 'retweeted_status' in data:
             print('retweeted_status was found in the data stream')
             is_data_good = 0
+        
+        # Ignore tweets from users in the list
+        for line in blocked_users:
+            if decoded['user']['id_str'] == line.rstrip():
+                print('Tweet is from a person on the naughty list')
+                print(line.rstrip())
+                is_data_good = 0
 
         # Check to see if the data was decided to be good
         if is_data_good == 1:
@@ -62,6 +75,7 @@ class StdOutListener(tweepy.StreamListener):
         return True
 
     def on_error(self, status):
+        print('The below status code was returned from Twitter')
         print(status)
         if status_code == 420:
             #returning False in on_data disconnects the stream
