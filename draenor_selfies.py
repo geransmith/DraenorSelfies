@@ -18,8 +18,6 @@ filename.close
 
 # retweet function
 def doRetweet(id_string):
-    print('WE MADE IT INTO doRetweet')
-    print(id_string)
     # authenticate against the Twitter API
     api = tweepy.API(auth)
     # actually do the retweet
@@ -40,26 +38,27 @@ class StdOutListener(tweepy.StreamListener):
         
         # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
         print('@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore')))
-        # looks at the json and see if we have pic.twitter.com there somewhere
-        # also looks the json and see if we have 'selfie' in the stream
+        
+        # Since I can't figure out how to read the dictionary data, look at the straight json for pic.twitter.com
+        # Check the 'text' key in the decoded dictionary for the word 'selfie'
         if 'pic.twitter.com' in data and 'selfie' in decoded['text']:
-            print('pic.twitter.com was found in the data stream')
+            print('GOOD - pic.twitter.com was found in the raw JSON and selfie was found in the tweet')
             is_data_good = 1
                   
-        # looks at the decoded text to see if they are talking about achievements
+        # Check the 'text' key in the decoded dictionary for the word 'Achievement'
         if 'Achievement' in decoded['text']:
-            print('Achievement found in the tweet')
+            print('BAD - Achievement found in the tweet')
             is_data_good = 0
             
-        # We don't retweet retweets
-        if 'retweeted_status' in data:
-            print('retweeted_status was found in the data stream')
+        # Check the decoded dictionary for the 'retweeted_status' key
+        if 'retweeted_status' in decoded:
+            print('BAD - retweeted_status was found in the data stream')
             is_data_good = 0
         
         # Ignore tweets from users in the list
         for line in blocked_users:
             if decoded['user']['id_str'] == line.rstrip():
-                print('Tweet is from a person on the naughty list')
+                print('BAD - Tweet is from a person on the naughty list')
                 print(line.rstrip())
                 is_data_good = 0
 
