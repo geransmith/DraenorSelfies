@@ -79,11 +79,13 @@ class StdOutListener(tweepy.StreamListener):
         if status_code == 420:
             #returning False in on_data disconnects the stream
             return False
+
     def on_exception(self, exception):
         print('Oh crap, we hit an exception')
         # I am kind of assuming that we should return False here to disconnect, but I think it will just crap out
         raise exception
-        return False	    
+        return False
+
 try:
     if __name__ == '__main__':
         l = StdOutListener()
