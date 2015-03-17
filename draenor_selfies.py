@@ -1,8 +1,9 @@
 #!/usr/bin/env python3.4
 # -*- coding: utf-8 -*-
 
-# imports the tweepy stuff, time for scheduling, and sys for reading a file
-import tweepy, time, sys, json
+# imports the tweepy stuff, datetime for rate limit, and sys for reading a file
+import tweepy, sys, json
+from datetime import datetime
 
 #enter the corresponding information from your Twitter application:
 consumer_key = '123456' #keep the quotes, replace this with your consumer key
@@ -15,6 +16,9 @@ access_token_secret = '123456' #keep the quotes, replace this with your access t
 filename=open('blocked_users.txt','r')
 blocked_users=filename.readlines()
 filename.close
+
+# initialize the dictionary we will use for rate limit
+rate_limit_dict = {}
 
 # retweet function
 def doRetweet(id_string):
@@ -44,13 +48,22 @@ class StdOutListener(tweepy.StreamListener):
         
         # Print out the tweet we are inspecting
         print('@%s: %s' % (tweet_handle, tweet_text))
-        
+              
         # Since I can't figure out how to read the dictionary data, look at the straight json for pic.twitter.com
         # Check the 'text' key in the decoded dictionary for the word 'selfie'
         if 'pic.twitter.com' in data and 'selfie' in tweet_text:
             print('GOOD - pic.twitter.com was found in the raw JSON and selfie was found in the tweet')
             is_data_good = 1
-                  
+
+        # check the dictionary to see if the user has been retweeted in the past 10 minutes (600 seconds)
+        if tweet_user_id in rate_limit_dict:
+            print('User was found in the rate limit dictionary')
+            print('Seconds between tweet time and now')
+            print((datetime.now() - rate_limit_dict[tweet_user_id]).total_seconds())
+            if (datetime.now() - rate_limit_dict[tweet_user_id]).total_seconds()  < 600:
+                print('BAD - person has had a retweet recently')
+                is_data_good = 0
+            
         # Check the 'text' key in the decoded dictionary for the word 'Achievement'
         if 'Achievement' in tweet_text:
             print('BAD - Achievement found in the tweet')
@@ -70,6 +83,9 @@ class StdOutListener(tweepy.StreamListener):
         # Check to see if the data was decided to be good
         if is_data_good == 1:
             print('Data was deemed good')
+            print('Adding the user to the rate limit dictionary')
+            # updates the rate_limit_dict with the time
+            rate_limit_dict[tweet_user_id] = datetime.now()
             doRetweet(tweet_id)
         else:
             print('Data was determined to be bad')
