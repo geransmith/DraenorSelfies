@@ -33,20 +33,26 @@ class StdOutListener(tweepy.StreamListener):
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
         
+        # grab some data we use later
+        tweet_id = decoded['id_str']
+        tweet_text = decoded['text']
+        tweet_user_id = decoded['user']['id_str']
+        tweet_handle = decoded['user']['screen_name']
+        
         # When this is 0, we will not retweet
         is_data_good = 0
         
-        # Also, we convert UTF-8 to ASCII ignoring all bad characters sent by users
-        print('@%s: %s' % (decoded['user']['screen_name'], decoded['text'].encode('ascii', 'ignore')))
+        # Print out the tweet we are inspecting
+        print('@%s: %s' % (tweet_handle, tweet_text))
         
         # Since I can't figure out how to read the dictionary data, look at the straight json for pic.twitter.com
         # Check the 'text' key in the decoded dictionary for the word 'selfie'
-        if 'pic.twitter.com' in data and 'selfie' in decoded['text']:
+        if 'pic.twitter.com' in data and 'selfie' in tweet_text:
             print('GOOD - pic.twitter.com was found in the raw JSON and selfie was found in the tweet')
             is_data_good = 1
                   
         # Check the 'text' key in the decoded dictionary for the word 'Achievement'
-        if 'Achievement' in decoded['text']:
+        if 'Achievement' in tweet_text:
             print('BAD - Achievement found in the tweet')
             is_data_good = 0
             
@@ -57,14 +63,13 @@ class StdOutListener(tweepy.StreamListener):
         
         # Ignore tweets from users in the list
         for line in blocked_users:
-            if decoded['user']['id_str'] == line.rstrip():
+            if tweet_user_id == line.rstrip():
                 print('BAD - Tweet is from a person on the naughty list')
                 is_data_good = 0
 
         # Check to see if the data was decided to be good
         if is_data_good == 1:
             print('Data was deemed good')
-            tweet_id = decoded['id_str']
             doRetweet(tweet_id)
         else:
             print('Data was determined to be bad')
@@ -78,13 +83,13 @@ class StdOutListener(tweepy.StreamListener):
         if status_code == 420:
             #returning False in on_data disconnects the stream
             return False
-
+            
     def on_exception(self, exception):
         print('Oh crap, we hit an exception')
         # I am kind of assuming that we should return False here to disconnect, but I think it will just crap out
         raise exception
         return False
-
+	    
 try:
     if __name__ == '__main__':
         l = StdOutListener()
