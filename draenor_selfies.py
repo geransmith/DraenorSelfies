@@ -44,16 +44,11 @@ class StdOutListener(tweepy.StreamListener):
         tweet_handle = decoded['user']['screen_name']
         
         # When this is 0, we will not retweet
-        is_data_good = 0
+        # Starting this out at one, since we are assuming the filter works coming in from Twitter
+        is_data_good = 1
         
         # Print out the tweet we are inspecting
         print('@%s: %s' % (tweet_handle, tweet_text))
-              
-        # Since I can't figure out how to read the dictionary data, look at the straight json for pic.twitter.com
-        # Check the 'text' key in the decoded dictionary for the word 'selfie'
-        if 'pic.twitter.com' in data and 'selfie' in tweet_text:
-            print('GOOD - pic.twitter.com was found in the raw JSON and selfie was found in the tweet')
-            is_data_good = 1
 
         # check the dictionary to see if the user has been retweeted in the past 10 minutes (600 seconds)
         if tweet_user_id in rate_limit_dict:
@@ -99,12 +94,6 @@ class StdOutListener(tweepy.StreamListener):
         if status_code == 420:
             #returning False in on_data disconnects the stream
             return False
-            
-    def on_exception(self, exception):
-        print('Oh crap, we hit an exception')
-        # I am kind of assuming that we should return False here to disconnect, but I think it will just crap out
-        raise exception
-        return False
 	    
 try:
     if __name__ == '__main__':
@@ -112,10 +101,9 @@ try:
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
 
-        # There are different kinds of streams: public stream, user stream, multi-user streams
-        # In this example follow #warcraft tag
-        # For more details refer to https://dev.twitter.com/docs/streaming-apis
+        # Authenticate with the streaming API and filter what we initially receive
+        # spaces are AND operators, while a comma indicates OR. More info here: https://dev.twitter.com/streaming/overview/request-parameters
         stream = tweepy.Stream(auth, l)
-        stream.filter(track=['#warcraft'], languages=['en'])
+        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'])
 except KeyboardInterrupt:
     sys.exit()
