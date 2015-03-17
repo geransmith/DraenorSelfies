@@ -59,7 +59,6 @@ class StdOutListener(tweepy.StreamListener):
         for line in blocked_users:
             if decoded['user']['id_str'] == line.rstrip():
                 print('BAD - Tweet is from a person on the naughty list')
-                print(line.rstrip())
                 is_data_good = 0
 
         # Check to see if the data was decided to be good
