@@ -43,11 +43,11 @@ class StdOutListener(tweepy.StreamListener):
         tweet_user_id = decoded['user']['id_str']
         tweet_handle = decoded['user']['screen_name']
         tweet_source = decoded['source']
-        
+
         # When this is 0, we will not retweet
         # Starting this out at one, since we are assuming the filter works coming in from Twitter
         is_data_good = 1
-        
+
         # Print out the tweet we are inspecting
         print('@%s: %s' % (tweet_handle, tweet_text))
 
@@ -59,27 +59,32 @@ class StdOutListener(tweepy.StreamListener):
             if (datetime.now() - rate_limit_dict[tweet_user_id]).total_seconds()  < 600:
                 print('BAD - person has had a retweet recently')
                 is_data_good = 0
-            
+                return True
+
         # Check the 'text' key in the decoded dictionary for the word 'Achievement'
         if 'Achievement' in tweet_text:
             print('BAD - Achievement found in the tweet')
             is_data_good = 0
-            
+            return True
+
         # Check the decoded dictionary for the 'retweeted_status' key
         if 'retweeted_status' in decoded:
             print('BAD - retweeted_status was found in the data stream')
             is_data_good = 0
-        
+            return True
+
         # Ignore tweets from users in the list
         for line in blocked_users:
             if tweet_user_id == line.rstrip():
                 print('BAD - Tweet is from a person on the naughty list')
                 is_data_good = 0
+                return True
 
         # check to see if the tweet originated in World of Warcraft (NOTE: This will break if WoW changes their app name for some reason)
         if 'World of Warcraft' not in tweet_source:
             print('BAD - tweet came from {} app and not World of Warcraft'.format(tweet_source))
             is_data_good = 0
+            return True
 
         # Check to see if the data was decided to be good
         if is_data_good == 1:
@@ -88,18 +93,8 @@ class StdOutListener(tweepy.StreamListener):
             # updates the rate_limit_dict with the time
             rate_limit_dict[tweet_user_id] = datetime.now()
             doRetweet(tweet_id)
-        else:
-            print('Data was determined to be bad')
-            print()
 
         return True
-
-    def on_error(self, status):
-        print('The below status code was returned from Twitter')
-        print(status)
-        if status_code == 420:
-            #returning False in on_data disconnects the stream
-            return False
 	    
 try:
     if __name__ == '__main__':
