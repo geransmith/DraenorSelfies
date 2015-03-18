@@ -42,6 +42,7 @@ class StdOutListener(tweepy.StreamListener):
         tweet_text = decoded['text']
         tweet_user_id = decoded['user']['id_str']
         tweet_handle = decoded['user']['screen_name']
+        tweet_source = decoded['source']
         
         # When this is 0, we will not retweet
         # Starting this out at one, since we are assuming the filter works coming in from Twitter
@@ -74,6 +75,11 @@ class StdOutListener(tweepy.StreamListener):
             if tweet_user_id == line.rstrip():
                 print('BAD - Tweet is from a person on the naughty list')
                 is_data_good = 0
+
+        # check to see if the tweet originated in World of Warcraft (NOTE: This will break if WoW changes their app name for some reason)
+        if 'World of Warcraft' not in tweet_source:
+            print('BAD - tweet came from {} app and not World of Warcraft'.format(tweet_source))
+            is_data_good = 0
 
         # Check to see if the data was decided to be good
         if is_data_good == 1:
