@@ -95,6 +95,20 @@ class StdOutListener(tweepy.StreamListener):
             doRetweet(tweet_id)
 
         return True
+
+    def on_error(self, status):
+        print('The below status code was returned from Twitter')
+        print(status)
+        if status_code == 420:
+            #returning False in on_data disconnects the stream
+            return False
+            
+    def on_exception(self, exception):
+        # if Tweepy has an unhandled exception, we will send a tweet asking for help
+        api = tweepy.API(auth)
+        api.update_status("I appear to have gone down. Help me @geran_smith, you're my only hope")
+        raise exception
+        return False
 	    
 try:
     if __name__ == '__main__':
