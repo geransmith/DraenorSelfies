@@ -93,6 +93,9 @@ class StdOutListener(tweepy.StreamListener):
             # updates the rate_limit_dict with the time
             rate_limit_dict[tweet_user_id] = datetime.now()
             doRetweet(tweet_id)
+        else
+            # yeah, I totally added this so it would have a space if the data was bad. The console was slowly driving me insane
+            print()
 
         return True
 
