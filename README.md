@@ -18,8 +18,8 @@ Used to retweet selfies taken in World of Warcraft. The bot in production can be
     If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
 
 DEPENDENCIES:  
-Tweepy - https://github.com/tweepy/tweepy
-pushbullet.py - https://github.com/randomchars/pushbullet.py
+Tweepy - https://github.com/tweepy/tweepy  
+pushbullet.py - https://github.com/randomchars/pushbullet.py  
 
 Tested on python 3.4.
 
