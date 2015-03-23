@@ -1,4 +1,5 @@
-WoW Selfie Bot - This script is used to retweet selfies taken in World of Warcraft
+# WoW Selfie Bot
+Used to retweet selfies taken in World of Warcraft. The bot in production can be found here: https://twitter.com/WoWSelfieBot
     Copyright (C) 2015  - Geran Smith
 
     This program is free software: you can redistribute it and/or modify
@@ -15,9 +16,6 @@ WoW Selfie Bot - This script is used to retweet selfies taken in World of Warcra
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
-
-# DraenorSelfies
-Used to retweet selfies taken in World of Warcraft. The bot in production can be found here: https://twitter.com/WoWSelfieBot
 
 DEPENDENCIES:
 Tweepy - http://tweepy.readthedocs.org/en/v3.3.0/
