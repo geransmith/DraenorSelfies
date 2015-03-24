@@ -21,15 +21,19 @@
 
 # If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
 
-# imports the tweepy stuff, datetime for rate limit, and sys for reading a file
+# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json and pushbullet for notifying me that something exploded
 import tweepy, sys, json
 from datetime import datetime
+from pushbullet import Pushbullet
 
 #enter the corresponding information from your Twitter application:
 consumer_key = '123456' #keep the quotes, replace this with your consumer key
 consumer_secret = '123456' #keep the quotes, replace this with your consumer secret key
 access_token = '123456'#keep the quotes, replace this with your access token
 access_token_secret = '123456'#keep the quotes, replace this with your access token secret
+
+# PushBullet API code information. API key can be captured from https://www.pushbullet.com/account
+pb = Pushbullet('123456')
 
 # We assume the text files exist and are in the same location as this script
 # Reads the "blocked_users" file and puts the data into the "blocked_users" variable, then closes the file (like a refrigerator)
@@ -129,9 +133,8 @@ class StdOutListener(tweepy.StreamListener):
             return False
             
     def on_exception(self, exception):
-        # if Tweepy has an unhandled exception, we will send a tweet asking for help
-        api = tweepy.API(auth)
-        api.update_status("I appear to have gone down. Help me @geran_smith, you're my only hope")
+        # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
+        push = pb.push_note("WoWSelfieBot has gone down", "Please restart the WoWSelfieBot script")
         raise exception
         return False
 	    
