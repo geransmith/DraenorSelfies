@@ -134,7 +134,7 @@ class StdOutListener(tweepy.StreamListener):
             
     def on_exception(self, exception):
         # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
-        push = pb.push_note("WoWSelfieBot has gone down", "Please restart the WoWSelfieBot script")
+        push = pb.push_note("WoWSelfieBot has gone down", str(exception))
         raise exception
         return False
 	    
