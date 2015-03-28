@@ -44,13 +44,27 @@ filename.close
 # initialize the dictionary we will use for rate limit
 rate_limit_dict = {}
 
+# We assume the text files exist and are in the same location as this script
+# Reads the "blocked_users" file and puts the data into the "blocked_users" variable, then closes the file (like a refrigerator)
+filename=open('blocked_users.txt','r')
+blocked_users=filename.readlines()
+filename.close
+
+# initialize the dictionary we will use for rate limit
+rate_limit_dict = {}
+
 # retweet function
 def doRetweet(id_string):
-    # actually do the retweet
-    api.retweet(id_string)
-    print('I did the retweet')
-    print()
-    return
+    try:
+        # actually do the retweet
+        api.retweet(id_string)
+        print('I did the retweet')
+        print()
+        return
+    except Exception as e:
+        if e.response:
+            print(e.response.content)
+        raise Exception
 
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
