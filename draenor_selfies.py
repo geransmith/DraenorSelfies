@@ -63,6 +63,7 @@ def doRetweet(id_string):
         return
     except Exception as e:
         if e.response:
+            push = pb.push_note("WoWSelfieBot has gone down", str(e.response.content))
             print(e.response.content)
         raise Exception
 
