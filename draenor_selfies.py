@@ -46,8 +46,6 @@ rate_limit_dict = {}
 
 # retweet function
 def doRetweet(id_string):
-    # authenticate against the Twitter API
-    api = tweepy.API(auth)
     # actually do the retweet
     api.retweet(id_string)
     print('I did the retweet')
@@ -60,6 +58,11 @@ class StdOutListener(tweepy.StreamListener):
             
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
+        
+        # check to see if we are falling behind in the Twitter stream. This also stops processing of the current "tweet" since the other fields won't exist
+        if 'warning' in decoded:
+            print(decoded)
+            return True
         
         # grab some data we use later
         tweet_id = decoded['id_str']
@@ -143,10 +146,12 @@ try:
         l = StdOutListener()
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
-
+        # authenticate against the Twitter API
+        # retry twice, wait five seconds between retries, only retry on 401 errors
+        api = tweepy.API(auth,retry_count=2,retry_delay=5,retry_errors=[401])
         # Authenticate with the streaming API and filter what we initially receive
         # spaces are AND operators, while a comma indicates OR. More info here: https://dev.twitter.com/streaming/overview/request-parameters
         stream = tweepy.Stream(auth, l)
-        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'])
+        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
 except KeyboardInterrupt:
     sys.exit()
