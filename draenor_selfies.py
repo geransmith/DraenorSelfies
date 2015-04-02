@@ -21,10 +21,11 @@
 
 # If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
 
-# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json and pushbullet for notifying me that something exploded
+# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json, pushbullet for notifying me that something exploded, sleep so we can sleep when the 401 errors happen
 import tweepy, sys, json
 from datetime import datetime
 from pushbullet import Pushbullet
+from time import sleep
 
 #enter the corresponding information from your Twitter application:
 consumer_key = '123456' #keep the quotes, replace this with your consumer key
@@ -44,28 +45,13 @@ filename.close
 # initialize the dictionary we will use for rate limit
 rate_limit_dict = {}
 
-# We assume the text files exist and are in the same location as this script
-# Reads the "blocked_users" file and puts the data into the "blocked_users" variable, then closes the file (like a refrigerator)
-filename=open('blocked_users.txt','r')
-blocked_users=filename.readlines()
-filename.close
-
-# initialize the dictionary we will use for rate limit
-rate_limit_dict = {}
-
 # retweet function
 def doRetweet(id_string):
-    try:
-        # actually do the retweet
-        api.retweet(id_string)
-        print('I did the retweet')
-        print()
-        return
-    except Exception as e:
-        if e.response:
-            push = pb.push_note("WoWSelfieBot has gone down", str(e.response.content))
-            print(e.response.content)
-        raise Exception
+    # actually do the retweet
+    api.retweet(id_string)
+    print('I did the retweet')
+    print()
+    return
 
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
@@ -146,9 +132,13 @@ class StdOutListener(tweepy.StreamListener):
     def on_error(self, status):
         print('The below status code was returned from Twitter')
         print(status)
-        if status_code == 420:
-            #returning False in on_data disconnects the stream
+        if status == 420:
+            #returning False in on_error disconnects the stream
             return False
+        if status == 401:
+            print('Received a 401 error')
+            sleep(60)
+            return True
             
     def on_exception(self, exception):
         # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
