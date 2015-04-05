@@ -56,7 +56,6 @@ def doRetweet(id_string):
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
     def on_data(self, data):
-            
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
         
@@ -135,17 +134,11 @@ class StdOutListener(tweepy.StreamListener):
         if status == 420:
             #returning False in on_error disconnects the stream
             return False
-        if status == 401:
-            print('Received a 401 error')
-            sleep(60)
-            return True
-            
     def on_exception(self, exception):
         # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
-        push = pb.push_note("WoWSelfieBot has gone down", str(exception))
+        push = pb.push_note("WoWSelfieBot had an unhandled exception", str(exception))
         raise exception
-        return False
-	    
+        return False 
 try:
     if __name__ == '__main__':
         l = StdOutListener()
@@ -160,3 +153,18 @@ try:
         stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
 except KeyboardInterrupt:
     sys.exit()
+except AttributeError:
+    push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(exception))
+    pass
+except tweepy.TweepError as e:
+    print('Below is the printed exception')
+    print(e)
+    if e.reponse == '401':    
+        print('Below is the response that hopefully came in')
+        print(e.response)
+        push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
+        sleep(60)
+        pass
+    else:
+        push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
+        raise e
