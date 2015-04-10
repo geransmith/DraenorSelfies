@@ -137,8 +137,8 @@ class StdOutListener(tweepy.StreamListener):
     def on_exception(self, exception):
         # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
         push = pb.push_note("WoWSelfieBot had an unhandled exception", str(exception))
-        raise exception
-        return False 
+        # Return True to keep processing the stream
+        return True 
 try:
     if __name__ == '__main__':
         l = StdOutListener()
@@ -151,10 +151,11 @@ try:
         # spaces are AND operators, while a comma indicates OR. More info here: https://dev.twitter.com/streaming/overview/request-parameters
         stream = tweepy.Stream(auth, l)
         stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
+# various exception handling blocks
 except KeyboardInterrupt:
     sys.exit()
-except AttributeError:
-    push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(exception))
+except AttributeError as e:
+    push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
     pass
 except tweepy.TweepError as e:
     print('Below is the printed exception')
@@ -168,3 +169,4 @@ except tweepy.TweepError as e:
     else:
         push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
         raise e
+except as e:
