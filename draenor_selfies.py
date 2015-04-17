@@ -134,11 +134,6 @@ class StdOutListener(tweepy.StreamListener):
         if status == 420:
             #returning False in on_error disconnects the stream
             return False
-    def on_exception(self, exception):
-        # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
-        push = pb.push_note("WoWSelfieBot had an unhandled exception", str(exception))
-        # Return True to keep processing the stream
-        return True 
 try:
     if __name__ == '__main__':
         l = StdOutListener()
@@ -160,13 +155,17 @@ except AttributeError as e:
 except tweepy.TweepError as e:
     print('Below is the printed exception')
     print(e)
-    if e.reponse == '401':    
-        print('Below is the response that hopefully came in')
-        print(e.response)
+    print()
+    print('Below is the arguments stored in .args')
+    print(e.args)
+    push = pb.push_note("WowSelfieBot - Checking status code", str(e))
+    if 'status code = 401' in e.reponse:
         push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
         sleep(60)
         pass
     else:
         push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
         raise e
-except as e:
+except Exception as e:
+    push = pb.push_note("WoWSelfieBot had an unhandled exception", str(e))
+    raise e
