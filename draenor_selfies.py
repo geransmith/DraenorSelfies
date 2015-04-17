@@ -159,7 +159,7 @@ except tweepy.TweepError as e:
     print('Below is the arguments stored in .args')
     print(e.args)
     push = pb.push_note("WowSelfieBot - Checking status code", str(e))
-    if 'status code = 401' in e.reponse:
+    if 'status code = 401' in e:
         push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
         sleep(60)
         pass
