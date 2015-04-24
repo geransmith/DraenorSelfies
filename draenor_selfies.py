@@ -47,11 +47,29 @@ rate_limit_dict = {}
 
 # retweet function
 def doRetweet(id_string):
-    # actually do the retweet
-    api.retweet(id_string)
-    print('I did the retweet')
-    print()
-    return
+    try:
+        # actually do the retweet
+        last_retweet = api.retweet(id_string)
+        print('I did the retweet')
+        print()
+        return
+    #since these various 401 errors occur in this method, we are going to check for them here
+    except tweepy.TweepError as e:
+        print('Below is the printed exception')
+        print(e)
+        print()
+        print('Below is the arguments stored in .args')
+        print(e.args)
+        push = pb.push_note("WowSelfieBot - Checking status code", str(e))
+        if 'status code = 401' in str(e):
+            push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
+            print(last_retweet)
+            sleep(60)
+            pass
+        else:
+            push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
+            print(last_retweet)
+        raise e
 
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
@@ -152,20 +170,6 @@ except KeyboardInterrupt:
 except AttributeError as e:
     push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
     pass
-except tweepy.TweepError as e:
-    print('Below is the printed exception')
-    print(e)
-    print()
-    print('Below is the arguments stored in .args')
-    print(e.args)
-    push = pb.push_note("WowSelfieBot - Checking status code", str(e))
-    if 'status code = 401' in str(e):
-        push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
-        sleep(60)
-        pass
-    else:
-        push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
-        raise e
 except Exception as e:
     push = pb.push_note("WoWSelfieBot had an unhandled exception", str(e))
     raise e
