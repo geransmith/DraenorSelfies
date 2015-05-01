@@ -21,10 +21,11 @@
 
 # If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
 
-# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json and pushbullet for notifying me that something exploded
+# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json, pushbullet for notifying me that something exploded, sleep so we can sleep when the 401 errors happen
 import tweepy, sys, json
 from datetime import datetime
 from pushbullet import Pushbullet
+from time import sleep
 
 #enter the corresponding information from your Twitter application:
 consumer_key = '123456' #keep the quotes, replace this with your consumer key
@@ -46,20 +47,36 @@ rate_limit_dict = {}
 
 # retweet function
 def doRetweet(id_string):
-    # authenticate against the Twitter API
-    api = tweepy.API(auth)
-    # actually do the retweet
-    api.retweet(id_string)
-    print('I did the retweet')
-    print()
-    return
+    try:
+        # actually do the retweet
+        api.retweet(id_string)
+        print('I did the retweet')
+        print()
+        return
+    #since these various 401 errors occur in this method, we are going to check for them here
+    except tweepy.TweepError as e:
+        print('Below is the printed exception')
+        print(e)
+        push = pb.push_note("WowSelfieBot - Checking status code", str(e))
+        if 'status code = 401' in str(e):
+            # leaving this notification in place just in case this doesn't work
+            push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
+            sleep(60)
+            pass
+        else:
+            push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
+            raise e
 
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
     def on_data(self, data):
-            
         # Twitter returns data in JSON format - we need to decode it first
         decoded = json.loads(data)
+        
+        # check to see if we are falling behind in the Twitter stream. This also stops processing of the current "tweet" since the other fields won't exist
+        if 'warning' in decoded:
+            print(decoded)
+            return True
         
         # grab some data we use later
         tweet_id = decoded['id_str']
@@ -128,25 +145,27 @@ class StdOutListener(tweepy.StreamListener):
     def on_error(self, status):
         print('The below status code was returned from Twitter')
         print(status)
-        if status_code == 420:
-            #returning False in on_data disconnects the stream
+        if status == 420:
+            #returning False in on_error disconnects the stream
             return False
-            
-    def on_exception(self, exception):
-        # if Tweepy has an unhandled exception, send a PushBullet push to myself to notify me
-        push = pb.push_note("WoWSelfieBot has gone down", str(exception))
-        raise exception
-        return False
-	    
 try:
     if __name__ == '__main__':
         l = StdOutListener()
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
-
+        # authenticate against the Twitter API
+        # retry twice, wait five seconds between retries, only retry on 401 errors
+        api = tweepy.API(auth,retry_count=2,retry_delay=5,retry_errors=[401])
         # Authenticate with the streaming API and filter what we initially receive
         # spaces are AND operators, while a comma indicates OR. More info here: https://dev.twitter.com/streaming/overview/request-parameters
         stream = tweepy.Stream(auth, l)
-        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'])
+        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
+# various exception handling blocks
 except KeyboardInterrupt:
     sys.exit()
+except AttributeError as e:
+    push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
+    pass
+except Exception as e:
+    push = pb.push_note("WoWSelfieBot had an unhandled exception", str(e))
+    raise e
