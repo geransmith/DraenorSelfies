@@ -49,7 +49,7 @@ rate_limit_dict = {}
 def doRetweet(id_string):
     try:
         # actually do the retweet
-        last_retweet = api.retweet(id_string)
+        api.retweet(id_string)
         print('I did the retweet')
         print()
         return
@@ -57,19 +57,15 @@ def doRetweet(id_string):
     except tweepy.TweepError as e:
         print('Below is the printed exception')
         print(e)
-        print()
-        print('Below is the arguments stored in .args')
-        print(e.args)
         push = pb.push_note("WowSelfieBot - Checking status code", str(e))
         if 'status code = 401' in str(e):
+            # leaving this notification in place just in case this doesn't work
             push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
-            print(last_retweet)
             sleep(60)
             pass
         else:
             push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
-            print(last_retweet)
-        raise e
+            raise e
 
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
