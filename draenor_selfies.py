@@ -61,7 +61,7 @@ def doRetweet(id_string):
         if 'status code = 401' in str(e):
             # leaving this notification in place just in case this doesn't work
             push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
-            sleep(60)
+            sleep(80)
             pass
         else:
             push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
@@ -148,6 +148,14 @@ class StdOutListener(tweepy.StreamListener):
         if status == 420:
             #returning False in on_error disconnects the stream
             return False
+    def on_exception(self,exception):
+        print(exception)
+        if "'NoneType' object" in str(exception):
+            push = pb.push_note("WoWSelfieBot had an AttributeError occur in on_exception", str(exception))
+            print("'NoneType' object found in on_exception catch")
+            return True
+        else:
+            raise exception
 try:
     if __name__ == '__main__':
         l = StdOutListener()
@@ -159,13 +167,17 @@ try:
         # Authenticate with the streaming API and filter what we initially receive
         # spaces are AND operators, while a comma indicates OR. More info here: https://dev.twitter.com/streaming/overview/request-parameters
         stream = tweepy.Stream(auth, l)
-        stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
+        try:
+            stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
+        except AttributeError as e:
+            if "'NoneType' object" in str(e):
+                push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
+                print("'NoneType' object found in try:except")
+        else:
+            raise e
 # various exception handling blocks
 except KeyboardInterrupt:
     sys.exit()
-except AttributeError as e:
-    push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
-    pass
 except Exception as e:
     push = pb.push_note("WoWSelfieBot had an unhandled exception", str(e))
     raise e
