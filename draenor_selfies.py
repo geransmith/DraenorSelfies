@@ -57,10 +57,13 @@ def doRetweet(id_string):
     except tweepy.TweepError as e:
         print('Below is the printed exception')
         print(e)
-        push = pb.push_note("WowSelfieBot - Checking status code", str(e))
         if 'status code = 401' in str(e):
             # leaving this notification in place just in case this doesn't work
             push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
+            sleep(80)
+            pass
+        if 'status code = 404' in str(e):
+            push = pb.push_note("WoWSelfieBot - TweepyError returned a 404", str(e))
             sleep(80)
             pass
         else:
@@ -155,6 +158,7 @@ class StdOutListener(tweepy.StreamListener):
             print("'NoneType' object found in on_exception catch")
             return True
         else:
+            print('I am in the on_exception else section')
             raise exception
 try:
     if __name__ == '__main__':
@@ -179,5 +183,5 @@ try:
 except KeyboardInterrupt:
     sys.exit()
 except Exception as e:
-    push = pb.push_note("WoWSelfieBot had an unhandled exception", str(e))
+    push = pb.push_note("WoWSelfieBot had an unhandled exception in the final try/catch", str(e))
     raise e
