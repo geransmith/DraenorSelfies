@@ -73,8 +73,15 @@ def doRetweet(id_string):
 # This is the listener, responsible for receiving data
 class StdOutListener(tweepy.StreamListener):
     def on_data(self, data):
-        # Twitter returns data in JSON format - we need to decode it first
-        decoded = json.loads(data)
+        # Handle this change (https://github.com/tweepy/tweepy/pull/595) and check to see if the data is "NoneType"
+        try:
+            # Twitter returns data in JSON format - we need to decode it first
+            decoded = json.loads(data)
+        except TypeError as e:
+            # Send a PB notification to check if the stream is up, but this should ignore the invalid data and move on
+            print('Error parsing the stream')
+            push = pb.push_note("WoWSelfieBot - Error decoding stream", str(e))
+            return True
         
         # check to see if we are falling behind in the Twitter stream. This also stops processing of the current "tweet" since the other fields won't exist
         if 'warning' in decoded:
@@ -156,6 +163,7 @@ class StdOutListener(tweepy.StreamListener):
         if "'NoneType' object" in str(exception):
             push = pb.push_note("WoWSelfieBot had an AttributeError occur in on_exception", str(exception))
             print("'NoneType' object found in on_exception catch")
+            pass
             return True
         else:
             print('I am in the on_exception else section')
@@ -177,6 +185,7 @@ try:
             if "'NoneType' object" in str(e):
                 push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
                 print("'NoneType' object found in try:except")
+                pass
         else:
             raise e
 # various exception handling blocks
