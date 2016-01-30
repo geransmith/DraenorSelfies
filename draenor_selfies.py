@@ -4,7 +4,7 @@
 ### LICENSE ###
 # WoW Selfie Bot
 # Used to retweet selfies taken in World of Warcraft. The bot in production can be found here: https://twitter.com/WoWSelfieBot
-# Copyright (C) 2015  - Geran Smith
+# Copyright (C) 2016  - Geran Smith
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,10 +21,9 @@
 
 # If you have any issues, please post on the GitHub page for this project: <https://github.com/tehspaceg/DraenorSelfies>
 
-# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json, pushbullet for notifying me that something exploded, sleep so we can sleep when the 401 errors happen
-import tweepy, sys, json
+# imports the tweepy stuff, datetime for rate limit, sys for reading a file, json for reading json, sleep so we can sleep when the 401 errors happen, requests for mailgun
+import tweepy, sys, json, requests
 from datetime import datetime
-from pushbullet import Pushbullet
 from time import sleep
 
 #enter the corresponding information from your Twitter application:
@@ -33,8 +32,11 @@ consumer_secret = '123456' #keep the quotes, replace this with your consumer sec
 access_token = '123456'#keep the quotes, replace this with your access token
 access_token_secret = '123456'#keep the quotes, replace this with your access token secret
 
-# PushBullet API code information. API key can be captured from https://www.pushbullet.com/account
-pb = Pushbullet('123456')
+#base mailgun information
+mailgun_key = '123456' #replace with your mailgun key
+mailgun_url = 'https://api.mailgun.net/v3/<domain>/messages' #replace with your base URL plus the messages object
+mailgun_recipient = 'email@email.xyz' #replace with your target email
+mailgun_from = 'email@email.xyz' #replace with the from address to use
 
 # We assume the text files exist and are in the same location as this script
 # Reads the "blocked_users" file and puts the data into the "blocked_users" variable, then closes the file (like a refrigerator)
@@ -59,15 +61,27 @@ def doRetweet(id_string):
         print(e)
         if 'status code = 401' in str(e):
             # leaving this notification in place just in case this doesn't work
-            push = pb.push_note("WowSelfieBot - TweepyError returned a 401", str(e))
+            request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+            'from': mailgun_from,
+            'to': mailgun_recipient,
+            'subject': 'WowSelfieBot - TweepyError returned a 401',
+            'text': str(e)})
             sleep(80)
             pass
         if 'status code = 404' in str(e):
-            push = pb.push_note("WoWSelfieBot - TweepyError returned a 404", str(e))
+            request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+            'from': mailgun_from,
+            'to': mailgun_recipient,
+            'subject': 'WowSelfieBot - TweepyError returned a 404',
+            'text': str(e)})
             sleep(80)
             pass
         else:
-            push = pb.push_note("WowSelfieBot - TweepyError has been found", str(e))
+            request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+            'from': mailgun_from,
+            'to': mailgun_recipient,
+            'subject': 'WowSelfieBot - TweepyError has been found',
+            'text': str(e)})
             raise e
 
 # This is the listener, responsible for receiving data
@@ -78,9 +92,13 @@ class StdOutListener(tweepy.StreamListener):
             # Twitter returns data in JSON format - we need to decode it first
             decoded = json.loads(data)
         except TypeError as e:
-            # Send a PB notification to check if the stream is up, but this should ignore the invalid data and move on
+            # Send an email to check if the stream is up, but this should ignore the invalid data and move on
             print('Error parsing the stream')
-            push = pb.push_note("WoWSelfieBot - Error decoding stream", str(e))
+            request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+            'from': mailgun_from,
+            'to': mailgun_recipient,
+            'subject': 'WoWSelfieBot - Error decoding stream',
+            'text': str(e)})
             return True
         
         # check to see if we are falling behind in the Twitter stream. This also stops processing of the current "tweet" since the other fields won't exist
@@ -161,7 +179,11 @@ class StdOutListener(tweepy.StreamListener):
     def on_exception(self,exception):
         print(exception)
         if "'NoneType' object" in str(exception):
-            push = pb.push_note("WoWSelfieBot had an AttributeError occur in on_exception", str(exception))
+            request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+            'from': mailgun_from,
+            'to': mailgun_recipient,
+            'subject': 'WoWSelfieBot had an AttributeError occur in on_exception',
+            'text': str(exception)})
             print("'NoneType' object found in on_exception catch")
             pass
             return True
@@ -183,7 +205,11 @@ try:
             stream.filter(track=['#warcraft selfie pic twitter com,#warcraft selfies pic twitter com, #wowselfie pic twitter com'], languages=['en'], stall_warnings='true')
         except AttributeError as e:
             if "'NoneType' object" in str(e):
-                push = pb.push_note("WoWSelfieBot had an AttributeError occur", str(e))
+                request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+                'from': mailgun_from,
+                'to': mailgun_recipient,
+                'subject': 'WoWSelfieBot had an AttributeError occur',
+                'text': str(e)})
                 print("'NoneType' object found in try:except")
                 pass
         else:
@@ -192,5 +218,9 @@ try:
 except KeyboardInterrupt:
     sys.exit()
 except Exception as e:
-    push = pb.push_note("WoWSelfieBot had an unhandled exception in the final try/catch", str(e))
+    request = requests.post(mailgun_url, auth=('api', mailgun_key), data={
+    'from': mailgun_from,
+    'to': mailgun_recipient,
+    'subject': 'WoWSelfieBot had an unhandled exception in the final try/catch',
+    'text': str(e)})
     raise e
