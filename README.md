@@ -1,6 +1,6 @@
 # WoW Selfie Bot
 Used to retweet selfies taken in World of Warcraft. The bot in production can be found here: https://twitter.com/WoWSelfieBot  
-    Copyright (C) 2015  - Geran Smith
+    Copyright (C) 2017  - Geran Smith
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
