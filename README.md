@@ -19,8 +19,7 @@ Used to retweet selfies taken in World of Warcraft. The bot in production can be
 
 # Dependencies:  
 Tweepy - https://github.com/tweepy/tweepy  
-pushbullet.py - https://github.com/randomchars/pushbullet.py  
 
-Tested on python 3.4.
+Tested on python 3.4+.
 
 I use http://tweeterid.com/, so convert the Twitter handles to IDs. Thanks for the helpful page!
