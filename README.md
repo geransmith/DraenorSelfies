@@ -1,6 +1,6 @@
 # WoW Selfie Bot
 Used to retweet selfies taken in World of Warcraft. The bot in production can be found here: https://twitter.com/WoWSelfieBot  
-    Copyright (C) 2017  - Geran Smith
+    Copyright (C) 2018  - Geran Smith
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,4 +22,4 @@ Tweepy - https://github.com/tweepy/tweepy
 
 Tested on python 3.4+.
 
-I use http://tweeterid.com/, so convert the Twitter handles to IDs. Thanks for the helpful page!
+I use http://tweeterid.com/, to convert the Twitter handles to IDs. Thanks for the helpful page!
